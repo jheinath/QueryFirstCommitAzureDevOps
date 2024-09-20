@@ -100,7 +100,7 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_azureDevOpsUrl}/{gitRepository.CollectionName}/{gitRepository.ProjectName}/_apis/git/repositories/{gitRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&searchCriteria.orderBy=createdDate&top=1&api-version=6.0")
+                RequestUri = new Uri($"{_azureDevOpsUrl}/{gitRepository.CollectionName}/{gitRepository.ProjectName}/_apis/git/repositories/{gitRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&top=100&api-version=6.0")
             };
             request.Headers.Add("Authorization",
                 $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_pat}"))}");
