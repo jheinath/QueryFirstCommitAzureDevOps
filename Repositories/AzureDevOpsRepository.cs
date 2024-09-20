@@ -57,12 +57,7 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
     {
         var result = new GitRepositoriesDto
         {
-            Projects = projectsDto.Projects.Select(x => new GitRepositoriesDto.ProjectDto
-            {
-                CollectionName = x.CollectionName,
-                ProjectName = x.ProjectName,
-                GitRepositoryIds = new List<string>()
-            })
+            GitRepositories = new List<GitRepositoriesDto.GitRepositoryDto>()
         };
         
         foreach (var project in projectsDto.Projects)
@@ -81,17 +76,18 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var repositories = JsonConvert.DeserializeObject<RepositoryListDto>(jsonResponse);
-            EnhanceResult(repositories, result, project);
+            foreach (var repository in repositories!.Value)
+            {
+                result.GitRepositories.ToList().Add(new GitRepositoriesDto.GitRepositoryDto
+                {
+                    ProjectName = project.ProjectName,
+                    CollectionName = project.CollectionName,
+                    GitRepositoryId = repository.Name
+                });
+            }
+            
         }
 
         return result;
-    }
-    
-    private static void EnhanceResult(RepositoryListDto? repositoryListDto, GitRepositoriesDto result, ProjectsDto.ProjectDto projectsDto)
-    {
-        foreach (var resultProject in result.Projects.Where(x => x.ProjectName == projectsDto.ProjectName))
-        {
-            resultProject.GitRepositoryIds = repositoryListDto!.Value.Select(x => x.Name);
-        }
     }
 }

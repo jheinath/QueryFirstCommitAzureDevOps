@@ -10,10 +10,7 @@ public class GetFirstCommitByUsernameQuery(IAzureDevOpsRepository azureDevOpsRep
         var projects = await azureDevOpsRepository.GetAllProjectsAsync();
         Console.WriteLine(string.Join(",", projects.Projects.Select(x => $"{x.CollectionName}, {x.ProjectName}")));
         var repos = await azureDevOpsRepository.GetAllGitRepositories(projects);
-        foreach (var test in repos.Projects)
-        {
-            Console.WriteLine(string.Join(",", test.GitRepositoryIds.Select(x => $"{test.CollectionName}:{test.ProjectName}:{x}")));
-        }
+        Console.WriteLine(string.Join(",", repos.GitRepositories.Select(x => $"{x.CollectionName}:{x.ProjectName}:{x.GitRepositoryId}")));
         return "id";
     }
 }

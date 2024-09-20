@@ -2,13 +2,13 @@
 
 public class GitRepositoriesDto
 {
-    public IEnumerable<ProjectDto> Projects { get; set; }
+    public IEnumerable<GitRepositoryDto> GitRepositories { get; set; }
     
-    public class ProjectDto
+    public class GitRepositoryDto
     {
         public string CollectionName { get; set; }
         public string ProjectName { get; set; }
-        public IEnumerable<string> GitRepositoryIds { get; set; }
+        public string GitRepositoryId { get; set; }
     }
 }
 
