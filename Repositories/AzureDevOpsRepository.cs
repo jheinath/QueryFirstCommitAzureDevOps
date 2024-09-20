@@ -53,7 +53,7 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
         
     }
 
-    public async Task<GitRepositoriesDto> GetAllGitRepositories(ProjectsDto projectsDto)
+    public async Task<GitRepositoriesDto> GetAllGitRepositoriesAsync(ProjectsDto projectsDto)
     {
         var result = new GitRepositoriesDto
         {
@@ -88,6 +88,33 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
             
         }
 
+        return result;
+    }
+
+    public async Task<IEnumerable<string>> GetFirstCommitOfAllRepositoriesAsync(string userEmail, GitRepositoriesDto repositoriesDto)
+    {
+        var commits = new List<CommitsDto>();
+        foreach (var gitRepository in repositoriesDto.GitRepositories)
+        {
+            using var httpClient = httpClientFactory.CreateClient();
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"{_azureDevOpsUrl}/{gitRepository.CollectionName}/{gitRepository.ProjectName}/_apis/git/repositories/{gitRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&$top=1&api-version=6.0")
+            };
+            request.Headers.Add("Authorization",
+                $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_pat}"))}");
+
+            var response = await httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var commitsDto = JsonConvert.DeserializeObject<CommitsDto>(jsonResponse);
+
+            commits = commits.Append(commitsDto).ToList()!;
+        }
+
+        var result = commits.Select(x => x.Value.MinBy(x => x.CreatedDate)).Select(x => x.Url);
         return result;
     }
 }

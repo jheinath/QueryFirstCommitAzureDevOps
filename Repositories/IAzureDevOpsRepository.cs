@@ -3,5 +3,6 @@
 public interface IAzureDevOpsRepository
 {
     Task<ProjectsDto> GetAllProjectsAsync();
-    Task<GitRepositoriesDto> GetAllGitRepositories(ProjectsDto projectsDto);
+    Task<GitRepositoriesDto> GetAllGitRepositoriesAsync(ProjectsDto projectsDto);
+    Task<IEnumerable<string>> GetFirstCommitOfAllRepositoriesAsync(string userEmail, GitRepositoriesDto repositoriesDto);
 }

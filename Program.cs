@@ -11,7 +11,7 @@ builder.Services.AddOptions<Configuration>()
 builder.Services.Configure<Configuration>(builder.Configuration.GetSection("configuration"));
 builder.Services.AddHostedService<Startup>();
 builder.Services.AddHttpClient();
-builder.Services.AddTransient<IGetFirstCommitByUsernameQuery, GetFirstCommitByUsernameQuery>();
+builder.Services.AddTransient<IGetFirstCommitByUserEmailQuery, GetFirstCommitByUserEmailQuery>();
 builder.Services.AddTransient<IAzureDevOpsRepository, AzureDevOpsRepository>();
 
 var app = builder.Build();

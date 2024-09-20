@@ -2,16 +2,16 @@
 
 namespace QueryFirstCommitAzureDevOps;
 
-public class Startup(IGetFirstCommitByUsernameQuery getFirstCommitByUsernameQuery)
+public class Startup(IGetFirstCommitByUserEmailQuery getFirstCommitByUserEmailQuery)
     : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var username = GetUsernameFromConsole();
+        var userEmail = GetUsernameFromConsole();
         var onlyMasterOrMain = GetShouldOnlySearchMaster();
 
-        var firstCommitId = await getFirstCommitByUsernameQuery.ExecuteAsync(username, onlyMasterOrMain);
-        Console.WriteLine(username);
+        var firstCommitId = await getFirstCommitByUserEmailQuery.ExecuteAsync(userEmail, onlyMasterOrMain);
+        Console.WriteLine(userEmail);
         Console.WriteLine(onlyMasterOrMain);
         Console.WriteLine(firstCommitId);
     }
@@ -20,11 +20,11 @@ public class Startup(IGetFirstCommitByUsernameQuery getFirstCommitByUsernameQuer
     {
         while (true)
         {
-            Console.Write("Insert user name to query first commit: ");
-            var username = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(username))
+            Console.Write("Insert user email to query first commit: ");
+            var userEmail = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(userEmail))
                 continue;
-            return username;
+            return userEmail;
         }
     }
     
