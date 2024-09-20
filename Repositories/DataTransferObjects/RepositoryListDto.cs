@@ -1,11 +1,11 @@
 ﻿namespace QueryFirstCommitAzureDevOps.Repositories.DataTransferObjects;
 
-public class ProjectListDto
+public class RepositoryListDto
 {
-    public List<ProjectDto> Value { get; set; }
+    public List<Repository> Value { get; set; }
 }
 
-public class ProjectDto
+public class Repository
 {
     public string Name { get; set; }
 }
