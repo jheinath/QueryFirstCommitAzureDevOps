@@ -12,8 +12,7 @@ public class CommitDto
     public AuthorDto Author { get; set; }
     public CommitterDto Committer { get; set; }
     public string Comment { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public string Url { get; set; } // Assuming this might be included
+    public string RemoteUrl { get; set; } // Assuming this might be included
     public string PushId { get; set; } // If push details are available
     public DateTime PushDate { get; set; } // If push date is available
     public List<ChangeDto> Changes { get; set; } // If changes are part of the response
@@ -23,6 +22,8 @@ public class AuthorDto
 {
     public string Name { get; set; }
     public string Email { get; set; }
+    public DateTime Date { get; set; }
+    
 }
 
 public class CommitterDto
