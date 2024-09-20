@@ -35,7 +35,14 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var projects = JsonConvert.DeserializeObject<ProjectListDto>(jsonResponse);
-            EnhanceResult(projects, result, collection);
+            foreach (var projectName in projects!.Value.Select(x => x.Name))
+            {
+                result.Projects = result.Projects.Append(new ProjectsDto.ProjectDto
+                {
+                    CollectionName = collection,
+                    ProjectName = projectName
+                });
+            }
         }
 
         return result;
@@ -43,14 +50,7 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
 
     private static void EnhanceResult(ProjectListDto? projects, ProjectsDto result, string collection)
     {
-        foreach (var projectName in projects!.Value.Select(x => x.Name))
-        {
-            result.Projects.ToList().Add(new ProjectsDto.ProjectDto
-            {
-                CollectionName = collection,
-                ProjectName = projectName
-            });
-        }
+        
     }
 
     public async Task<GitRepositoriesDto> GetAllGitRepositories(ProjectsDto projectsDto)
@@ -78,7 +78,7 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
             var repositories = JsonConvert.DeserializeObject<RepositoryListDto>(jsonResponse);
             foreach (var repository in repositories!.Value)
             {
-                result.GitRepositories.ToList().Add(new GitRepositoriesDto.GitRepositoryDto
+                result.GitRepositories = result.GitRepositories.Append(new GitRepositoriesDto.GitRepositoryDto
                 {
                     ProjectName = project.ProjectName,
                     CollectionName = project.CollectionName,
