@@ -2,5 +2,5 @@
 
 public interface IAzureDevOpsRepository
 {
-    Task<IDictionary<string, string>> GetAllProjectsAsync();
+    Task<IEnumerable<Tuple<string, string>>> GetAllProjectsAsync();
 }

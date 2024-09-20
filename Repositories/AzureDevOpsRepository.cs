@@ -1,7 +1,6 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
+﻿using System.Text;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using QueryFirstCommitAzureDevOps.Repositories.DataTransferObjects;
 
 namespace QueryFirstCommitAzureDevOps.Repositories;
@@ -13,9 +12,9 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
     private readonly IEnumerable<string> _collections = configuration.Value.Collections;
     private readonly string _pat = configuration.Value.PersonalAccessToken;
     
-    public async Task<IDictionary<string, string>> GetAllProjectsAsync()
+    public async Task<IEnumerable<Tuple<string, string>>> GetAllProjectsAsync()
     {
-        var result = new Dictionary<string, string>();
+        var result = new List<Tuple<string, string>>();
 
         foreach (var collection in _collections)
         {
@@ -23,20 +22,19 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
             var request = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_azureDevOpsUrl}/collection/_apis/projects?api-version=6.0"),
+                RequestUri = new Uri($"{_azureDevOpsUrl}/{collection}/_apis/projects?api-version=6.0"),
             };
-            request.Headers.Add("Authorization", $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_pat}"))}");
-            request.Content!.Headers.ContentType = new MediaTypeHeaderValue("application/json-patch+json");
+            request.Headers.Add("Authorization",
+                $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_pat}"))}");
 
             var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
-            await using var contentStream = await response.Content.ReadAsStreamAsync();
-            var projects =  await JsonSerializer.DeserializeAsync<ProjectListDto>(contentStream);
-
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            var projects = JsonConvert.DeserializeObject<ProjectListDto>(jsonResponse);
             foreach (var projectName in projects!.Value.Select(x => x.Name))
             {
-                result.Add(collection, projectName);
+                result.Add(new Tuple<string, string>(collection, projectName));
             }
         }
 

@@ -8,7 +8,7 @@ public class GetFirstCommitByUsernameQuery(IAzureDevOpsRepository azureDevOpsRep
     public async Task<string> ExecuteAsync(string username, bool onlyMasterOrMain)
     {
         var projects = await azureDevOpsRepository.GetAllProjectsAsync();
-        Console.WriteLine(projects);
-        return "moin";
+        Console.WriteLine(string.Join(",", projects.Select(x => $"{x.Item1}, {x.Item2}")));
+        return "id";
     }
 }

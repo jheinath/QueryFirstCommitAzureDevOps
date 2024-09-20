@@ -10,6 +10,7 @@ builder.Services.AddOptions<Configuration>()
     .ValidateDataAnnotations();
 builder.Services.Configure<Configuration>(builder.Configuration.GetSection("configuration"));
 builder.Services.AddHostedService<Startup>();
+builder.Services.AddHttpClient();
 builder.Services.AddTransient<IGetFirstCommitByUsernameQuery, GetFirstCommitByUsernameQuery>();
 builder.Services.AddTransient<IAzureDevOpsRepository, AzureDevOpsRepository>();
 
