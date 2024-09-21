@@ -1,4 +1,4 @@
-﻿namespace QueryFirstCommitAzureDevOps.Repositories;
+﻿namespace QueryFirstCommitAzureDevOps.Adapters.AzureDevOps.Repositories.DataTransferObjects;
 
 public class GitRepositoriesDto
 {

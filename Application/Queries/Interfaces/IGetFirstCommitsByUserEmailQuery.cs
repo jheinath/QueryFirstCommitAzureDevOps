@@ -1,4 +1,4 @@
-﻿namespace QueryFirstCommitAzureDevOps.Queries;
+﻿namespace Application.Queries.Interfaces;
 
 public interface IGetFirstCommitsByUserEmailQuery
 {

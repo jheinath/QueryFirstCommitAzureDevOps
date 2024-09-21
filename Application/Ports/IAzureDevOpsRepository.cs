@@ -1,4 +1,6 @@
-﻿namespace QueryFirstCommitAzureDevOps.Repositories;
+﻿using QueryFirstCommitAzureDevOps.Adapters.AzureDevOps.Repositories.DataTransferObjects;
+
+namespace Application.Ports;
 
 public interface IAzureDevOpsRepository
 {

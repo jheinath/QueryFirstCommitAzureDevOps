@@ -1,4 +1,4 @@
-﻿using QueryFirstCommitAzureDevOps.Queries;
+﻿using Application.Queries.Interfaces;
 
 namespace QueryFirstCommitAzureDevOps;
 

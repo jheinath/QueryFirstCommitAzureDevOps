@@ -1,6 +1,7 @@
-﻿using QueryFirstCommitAzureDevOps.Repositories;
+﻿using Application.Ports;
+using Application.Queries.Interfaces;
 
-namespace QueryFirstCommitAzureDevOps.Queries;
+namespace Application.Queries;
 
 public class GetFirstCommitsByUserEmailQuery(IAzureDevOpsRepository azureDevOpsRepository)
     : IGetFirstCommitsByUserEmailQuery

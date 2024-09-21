@@ -11,10 +11,39 @@
       <Content Update="Configuration\appsettings.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
+      <Content Remove="Adapters.AzureDevOps\**" />
+      <Content Remove="Application\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <Compile Remove="Adapters.AzureDevOps\**" />
+      <Compile Remove="Application\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Adapters.AzureDevOps\**" />
+      <EmbeddedResource Remove="Application\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Adapters.AzureDevOps\**" />
+      <None Remove="Application\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Adapters.AzureDevOps\obj\Adapters.AzureDevOps.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="Adapters.AzureDevOps\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="Adapters.AzureDevOps\obj\project.packagespec.json" />
+      <_ContentIncludedByDefault Remove="Application\bin\Debug\net8.0\Application.deps.json" />
+      <_ContentIncludedByDefault Remove="Application\obj\Application.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="Application\obj\Debug\net8.0\Application.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="Application\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="Application\obj\project.packagespec.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="Adapters.AzureDevOps\Adapters.AzureDevOps.csproj" />
+      <ProjectReference Include="Application\Application.csproj" />
     </ItemGroup>
 
 </Project>
