@@ -7,10 +7,15 @@ public class Startup(IGetFirstCommitsByUserEmailQuery getFirstCommitsByUserEmail
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var userEmail = GetUsernameFromConsole();
-        var amountOfCommits = AmountOfCommitsFromConsole();
-        var firstCommits = (await getFirstCommitsByUserEmailQuery.ExecuteAsync(userEmail, amountOfCommits)).ToList();
-        OutputFirstCommits(firstCommits);
+        var continueSearching = true;
+        while (continueSearching)
+        {
+            var userEmail = GetUsernameFromConsole();
+            var amountOfCommits = AmountOfCommitsFromConsole();
+            var firstCommits = (await getFirstCommitsByUserEmailQuery.ExecuteAsync(userEmail, amountOfCommits)).ToList();
+            OutputFirstCommits(firstCommits);
+            continueSearching = ContinueWithAnotherSearch();
+        }
     }
 
     private static string GetUsernameFromConsole()
@@ -40,11 +45,31 @@ public class Startup(IGetFirstCommitsByUserEmailQuery getFirstCommitsByUserEmail
     private static void OutputFirstCommits(IList<(string, DateTime)> firstCommits)
     {
         if (!firstCommits.Any())
-            Console.WriteLine("No commits for the given configuration.");
+            Console.WriteLine("No commits for the user with configuration.");
         
         foreach (var commit in firstCommits)
         {
             Console.WriteLine($"{commit.Item2} - {commit.Item1}");
+        }
+    }
+    
+    private static bool ContinueWithAnotherSearch()
+    {
+        while (true)
+        {
+            Console.Write("Want to do another query? (y/n): ");
+            var yesOrNo = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(yesOrNo))
+                continue;
+            switch (yesOrNo.ToLower())
+            {
+                case "y":
+                    return true;
+                case "n":
+                    return false;
+                default:
+                    continue;
+            }
         }
     }
     
