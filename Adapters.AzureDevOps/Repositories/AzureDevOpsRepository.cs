@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Concurrent;
+using System.Text;
 using Adapters.AzureDevOps.Repositories.DataTransferObjects;
 using Application.Ports;
 using Microsoft.Extensions.Options;
@@ -79,41 +80,60 @@ public class AzureDevOpsRepository(IOptions<Configuration> configuration, IHttpC
 
     public async Task<IEnumerable<(string, DateTime)>> GetFirstCommitOfAllRepositoriesAsync(string userEmail, GitRepositoriesDto repositoriesDto, int amountOfCommits)
     {
-        using var httpClient = httpClientFactory.CreateClient();
         const int pageSize = 100;
-        var commitToAllRepositories = new List<CommitDto>();
+        var commitToAllRepositories = new ConcurrentBag<CommitDto>(); // Use ConcurrentBag for thread-safe collection
+        var tasks = new List<Task>();
+
         foreach (var gitRepository in repositoriesDto.GitRepositories)
         {
-            var commitsToSingleRepository = new List<CommitDto>();
-            var page = 1;
-            var continuePaging = true;
-            while (continuePaging)
+            // Capture the current repository variable for the task
+            var currentRepository = gitRepository;
+    
+            var task = Task.Run(async () =>
             {
-                var request = new HttpRequestMessage
+                using var httpClient = httpClientFactory.CreateClient();
+                var commitsToSingleRepository = new List<CommitDto>();
+                var page = 1;
+                var continuePaging = true;
+
+                while (continuePaging)
                 {
-                    Method = HttpMethod.Get,
-                    RequestUri = new Uri($"{_azureDevOpsUrl}/{gitRepository.CollectionName}/{gitRepository.ProjectName}/_apis/git/repositories/{gitRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&searchCriteria.$top={pageSize}&searchCriteria.$skip={pageSize * (page - 1)}&api-version=6.0")
-                };
-                AddBasicAuthWithPat(request);
+                    var request = new HttpRequestMessage
+                    {
+                        Method = HttpMethod.Get,
+                        RequestUri = new Uri($"{_azureDevOpsUrl}/{currentRepository.CollectionName}/{currentRepository.ProjectName}/_apis/git/repositories/{currentRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&searchCriteria.$top={pageSize}&searchCriteria.$skip={pageSize * (page - 1)}&api-version=6.0")
+                    };
+                    AddBasicAuthWithPat(request);
 
-                var response = await httpClient.SendAsync(request);
-                response.EnsureSuccessStatusCode();
+                    var response = await httpClient.SendAsync(request);
+                    response.EnsureSuccessStatusCode();
 
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var commitsDto = JsonConvert.DeserializeObject<CommitsDto>(jsonResponse);
-                if (commitsDto == null) continue;
-                commitsToSingleRepository.AddRange(commitsDto.Value);
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var commitsDto = JsonConvert.DeserializeObject<CommitsDto>(jsonResponse);
+                    if (commitsDto == null) continue;
 
-                page++;
-                if (commitsDto.Count > 99) continue;
-                continuePaging = false;
+                    commitsToSingleRepository.AddRange(commitsDto.Value);
 
+                    page++;
+                    if (commitsDto.Count < pageSize) continuePaging = false;
+                }
+
+                // Process the oldest commits for this repository
                 var oldestCommitToSingleRepository = commitsToSingleRepository
                     .OrderBy(x => x.Author.Date)
                     .Take(amountOfCommits);
-                commitToAllRepositories.AddRange(oldestCommitToSingleRepository);
-            }
+        
+                // Add results to the thread-safe collection
+                foreach (var commit in oldestCommitToSingleRepository)
+                {
+                    commitToAllRepositories.Add(commit);
+                }
+            });
+
+            tasks.Add(task);
         }
+
+        await Task.WhenAll(tasks);
 
         return commitToAllRepositories.Where(dto => dto?.Author?.Date is not null)
             .OrderBy(x => x.Author.Date)
