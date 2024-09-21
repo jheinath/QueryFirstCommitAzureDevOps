@@ -13,5 +13,3 @@ builder.Services.AddAzureDevopsAdapter();
 
 var app = builder.Build();
 app.Run();
-
-Console.WriteLine();
