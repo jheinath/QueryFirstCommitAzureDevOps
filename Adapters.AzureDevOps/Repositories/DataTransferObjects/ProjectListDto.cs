@@ -1,5 +1,5 @@
 ﻿// ReSharper disable UnusedAutoPropertyAccessor.Global
-namespace QueryFirstCommitAzureDevOps.Adapters.AzureDevOps.Repositories.DataTransferObjects.ResponseDtos;
+namespace Adapters.AzureDevOps.Repositories.DataTransferObjects;
 
 public class ProjectListDto
 {

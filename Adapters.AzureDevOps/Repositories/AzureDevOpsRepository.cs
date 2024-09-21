@@ -1,9 +1,9 @@
 ﻿using System.Text;
+using Adapters.AzureDevOps.Repositories.DataTransferObjects;
 using Application.Ports;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using QueryFirstCommitAzureDevOps.Adapters.AzureDevOps.Repositories.DataTransferObjects;
-using QueryFirstCommitAzureDevOps.Adapters.AzureDevOps.Repositories.DataTransferObjects.ResponseDtos;
 
 namespace Adapters.AzureDevOps.Repositories;
 
