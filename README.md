@@ -9,7 +9,7 @@ All you have to do is follow the `How to use?` and provide the user email and th
 It is working with an on-premise Azure DevOps v6.0 Api.
 
 ## How to use? - As usual user
-1. Click download and extract zip
+1. Click download and extract zip:
 [Download](https://github.com/jheinath/QueryFirstCommitAzureDevOps/actions/runs/10972388692/artifacts/1961565100)
 2. Generate a personal access token (PAT) in Azure DevOps (read on all repositories is enough) -
    If you  want to query multiple organizations select "all accessible organizations" in the PAT creation dialog. (Help: https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat)
