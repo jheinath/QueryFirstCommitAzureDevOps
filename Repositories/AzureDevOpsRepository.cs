@@ -48,11 +48,6 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
         return result;
     }
 
-    private static void EnhanceResult(ProjectListDto? projects, ProjectsDto result, string collection)
-    {
-        
-    }
-
     public async Task<GitRepositoriesDto> GetAllGitRepositoriesAsync(ProjectsDto projectsDto)
     {
         var result = new GitRepositoriesDto
@@ -93,28 +88,42 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
 
     public async Task<IEnumerable<string>> GetFirstCommitOfAllRepositoriesAsync(string userEmail, GitRepositoriesDto repositoriesDto)
     {
-        var commits = new List<CommitDto>();
+        using var httpClient = httpClientFactory.CreateClient();
+        const int pageSize = 100;
+        var commitToAllRepositories = new List<CommitDto>();
         foreach (var gitRepository in repositoriesDto.GitRepositories)
         {
-            using var httpClient = httpClientFactory.CreateClient();
-            var request = new HttpRequestMessage
+            var commitsToSingleRepository = new List<CommitDto>();
+            var page = 1;
+            var continuePaging = true;
+            while (continuePaging)
             {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri($"{_azureDevOpsUrl}/{gitRepository.CollectionName}/{gitRepository.ProjectName}/_apis/git/repositories/{gitRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&top=100&api-version=6.0")
-            };
-            request.Headers.Add("Authorization",
-                $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_pat}"))}");
+                var request = new HttpRequestMessage
+                {
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri($"{_azureDevOpsUrl}/{gitRepository.CollectionName}/{gitRepository.ProjectName}/_apis/git/repositories/{gitRepository.GitRepositoryId}/commits?searchCriteria.author={userEmail}&searchCriteria.$top={pageSize}&searchCriteria.$skip={pageSize * (page - 1)}api-version=6.0")
+                };
+                request.Headers.Add("Authorization",
+                    $"Basic {Convert.ToBase64String(Encoding.ASCII.GetBytes($":{_pat}"))}");
 
-            var response = await httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+                var response = await httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
 
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-            var commitsDto = JsonConvert.DeserializeObject<CommitsDto>(jsonResponse);
+                var jsonResponse = await response.Content.ReadAsStringAsync();
+                var commitsDto = JsonConvert.DeserializeObject<CommitsDto>(jsonResponse);
+                if (commitsDto == null) continue;
+                commitsToSingleRepository.AddRange(commitsDto.Value);
 
-            if (commitsDto != null) commits = commits.Append(commitsDto.Value.MinBy(x => x.Author.Date)).ToList()!;
+                page++;
+                if (commitsDto.Count > 99) continue;
+                continuePaging = false;
+
+                var oldestCommitToSingleRepository = commitsToSingleRepository.MinBy(x => x.Author.Date);
+                commitToAllRepositories.Add(oldestCommitToSingleRepository!);
+            }
         }
 
-        var result = commits.Where(dto => dto?.Author?.Date is not null).MinBy(x => x.Author.Date)?.RemoteUrl;
-        return [result ?? string.Empty];
+        var result = commitToAllRepositories.Where(dto => dto?.Author?.Date is not null).MinBy(x => x.Author.Date)?.RemoteUrl;
+        return [result!];
     }
 }
