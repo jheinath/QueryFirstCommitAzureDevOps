@@ -9,7 +9,7 @@ public class Startup(IGetFirstCommitsByUserEmailQuery getFirstCommitsByUserEmail
     {
         var userEmail = GetUsernameFromConsole();
         var amountOfCommits = AmountOfCommitsFromConsole();
-        var firstCommits = await getFirstCommitsByUserEmailQuery.ExecuteAsync(userEmail, amountOfCommits);
+        var firstCommits = (await getFirstCommitsByUserEmailQuery.ExecuteAsync(userEmail, amountOfCommits)).ToList();
         OutputFirstCommits(firstCommits);
     }
 
@@ -37,8 +37,11 @@ public class Startup(IGetFirstCommitsByUserEmailQuery getFirstCommitsByUserEmail
         }
     }
 
-    private static void OutputFirstCommits(IEnumerable<(string, DateTime)> firstCommits)
+    private static void OutputFirstCommits(IList<(string, DateTime)> firstCommits)
     {
+        if (!firstCommits.Any())
+            Console.WriteLine("No commits for the given configuration.");
+        
         foreach (var commit in firstCommits)
         {
             Console.WriteLine($"{commit.Item2} - {commit.Item1}");
