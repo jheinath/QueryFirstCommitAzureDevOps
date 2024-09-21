@@ -8,10 +8,9 @@ builder.Configuration.AddJsonFile("Configuration/appsettings.json", optional: fa
 builder.Services.AddOptions<Configuration>()
     .Bind(builder.Configuration.GetSection("configuration"))
     .ValidateDataAnnotations();
-builder.Services.Configure<Configuration>(builder.Configuration.GetSection("configuration"));
 builder.Services.AddHostedService<Startup>();
 builder.Services.AddHttpClient();
-builder.Services.AddTransient<IGetFirstCommitByUserEmailQuery, GetFirstCommitByUserEmailQuery>();
+builder.Services.AddTransient<IGetFirstCommitsByUserEmailQuery, GetFirstCommitsByUserEmailQuery>();
 builder.Services.AddTransient<IAzureDevOpsRepository, AzureDevOpsRepository>();
 
 var app = builder.Build();

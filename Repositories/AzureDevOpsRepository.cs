@@ -86,7 +86,7 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
         return result;
     }
 
-    public async Task<IEnumerable<string>> GetFirstCommitOfAllRepositoriesAsync(string userEmail, GitRepositoriesDto repositoriesDto)
+    public async Task<IEnumerable<(string, DateTime)>> GetFirstCommitOfAllRepositoriesAsync(string userEmail, GitRepositoriesDto repositoriesDto, int amountOfCommits)
     {
         using var httpClient = httpClientFactory.CreateClient();
         const int pageSize = 100;
@@ -118,12 +118,11 @@ public class AzureDevOpsRepository(IOptions<Configuration.Configuration> configu
                 if (commitsDto.Count > 99) continue;
                 continuePaging = false;
 
-                var oldestCommitToSingleRepository = commitsToSingleRepository.MinBy(x => x.Author.Date);
-                commitToAllRepositories.Add(oldestCommitToSingleRepository!);
+                var oldestCommitToSingleRepository = commitsToSingleRepository.OrderBy(x => x.Author.Date).Take(amountOfCommits);
+                commitToAllRepositories.AddRange(oldestCommitToSingleRepository);
             }
         }
 
-        var result = commitToAllRepositories.Where(dto => dto?.Author?.Date is not null).MinBy(x => x.Author.Date)?.RemoteUrl;
-        return [result!];
+        return commitToAllRepositories.Where(dto => dto?.Author?.Date is not null).OrderBy(x => x.Author.Date).Take(amountOfCommits).Select(x => (x.RemoteUrl, x.Author.Date));
     }
 }

@@ -2,18 +2,15 @@
 
 namespace QueryFirstCommitAzureDevOps;
 
-public class Startup(IGetFirstCommitByUserEmailQuery getFirstCommitByUserEmailQuery)
+public class Startup(IGetFirstCommitsByUserEmailQuery getFirstCommitsByUserEmailQuery)
     : IHostedService
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var userEmail = GetUsernameFromConsole();
-        var onlyMasterOrMain = GetShouldOnlySearchMaster();
-
-        var firstCommitId = await getFirstCommitByUserEmailQuery.ExecuteAsync(userEmail, onlyMasterOrMain);
-        Console.WriteLine(userEmail);
-        Console.WriteLine(onlyMasterOrMain);
-        Console.WriteLine(firstCommitId);
+        var amountOfCommits = AmountOfCommitsFromConsole();
+        var firstCommits = await getFirstCommitsByUserEmailQuery.ExecuteAsync(userEmail, amountOfCommits);
+        OutputFirstCommits(firstCommits);
     }
 
     private static string GetUsernameFromConsole()
@@ -28,28 +25,26 @@ public class Startup(IGetFirstCommitByUserEmailQuery getFirstCommitByUserEmailQu
         }
     }
     
-    private static bool GetShouldOnlySearchMaster()
+    private static int AmountOfCommitsFromConsole()
     {
         while (true)
         {
-            Console.Write("Should only commits to master or main be included? (y/n): ");
-            var yesOrNo = Console.ReadLine();
-            if (string.IsNullOrWhiteSpace(yesOrNo))
+            Console.Write("Insert amount of first commits you want to receiver (e.g. 10): ");
+            var input = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(input) || !int.TryParse(input, out var amount))
                 continue;
-
-            switch (yesOrNo.ToLower())
-            {
-                case "y":
-                    return true;
-                case "n":
-                    return false;
-                default:
-                    continue;
-            }
+            return amount;
         }
-        
     }
 
+    private static void OutputFirstCommits(IEnumerable<(string, DateTime)> firstCommits)
+    {
+        foreach (var commit in firstCommits)
+        {
+            Console.WriteLine($"{commit.Item2} - {commit.Item1}");
+        }
+    }
+    
     public Task StopAsync(CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
