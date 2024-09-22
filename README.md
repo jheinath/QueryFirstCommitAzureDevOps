@@ -1,5 +1,5 @@
 # Query First Commit Azure DevOps
-
+[![Build .exe](https://github.com/jheinath/QueryFirstCommitAzureDevOps/actions/workflows/build.yml/badge.svg)](https://github.com/jheinath/QueryFirstCommitAzureDevOps/actions/workflows/build.yml)
 ## What is this project for?
 This projects helps you find the first commits of a user on a
 Azure DevOps instance - searching through all repositories of all projects of all configured project collections.
